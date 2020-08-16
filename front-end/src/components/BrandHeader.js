@@ -5,6 +5,10 @@ import { Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-boots
 class BrandHeader extends Component {
 
   render() {
+    this.fullName = ''
+   if(!!sessionStorage.getItem('first_name') && !!sessionStorage.getItem('last_name')){
+     this.fullName = sessionStorage.getItem('first_name')+' '+ sessionStorage.getItem('last_name')
+    }
     const loginRegLink = (
       <Navbar bg="light" expand="lg">
         <Navbar.Brand href="/">JIRA Mock</Navbar.Brand>
@@ -19,6 +23,7 @@ class BrandHeader extends Component {
     )
 
     const loggedInUser = (
+      
       <div>
       <Navbar bg="light" expand="lg">
         <Navbar.Brand href="/">JIRA Mock</Navbar.Brand>
@@ -31,7 +36,8 @@ class BrandHeader extends Component {
               <FormControl type="text" placeholder="Search" className="mr-sm-2" />
               <Button variant="outline-success">Search</Button>
             </Form>
-            <Nav.Link style={{ 'marginLeft': '550px' }} href="/logout">Log Out</Nav.Link>
+            <Nav.Link style={{ 'marginLeft': '550px' }}href="/home">{this.fullName}</Nav.Link>
+            <Nav.Link style={{ 'marginLeft': '10px' }} href="/logout">Log Out</Nav.Link>
           </Nav>
 
         </Navbar.Collapse>

@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
             },
             is_active : {
                 type: DataTypes.CHAR,
+                default: 'Y'
+            },
+            team:{
+                type: DataTypes.STRING
             }
         },
         {

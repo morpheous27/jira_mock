@@ -38,6 +38,14 @@ class Home extends Component {
       {
         headerName: "Status", field: "status"
       }],
+      defaultColDef: {
+        editable: true,
+        sortable: true,
+        flex: 1,
+        minWidth: 100,
+        filter: true,
+        resizable: true
+    },
       rowData: null
     },
 
@@ -50,13 +58,17 @@ class Home extends Component {
       user_mail: this.user_mail
     }
     fetchUserJira(user).then(res => {
-      if (!!res) {
+      if (!!res && !!res.jiras) {
         const jiras = []
         jiras.push(res.jiras)
         this.setState({
           rowData: jiras
         })
 
+      }else{
+        this.setState({
+          rowData: ''
+        })
       }
     }).catch((err) => {
       console.log('error- ' + err)
@@ -86,7 +98,7 @@ class Home extends Component {
               <div className="ag-theme-alpine" style={{ height: '200px' }}>
                 <AgGridReact
                   columnDefs={this.state.columnDefs}
-                  rowData={this.state.rowData}>
+                  rowData={this.state.rowData} defaultColDef={this.state.defaultColDef}>
                 </AgGridReact>
               </div>
             </Card.Body>

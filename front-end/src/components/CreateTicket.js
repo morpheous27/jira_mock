@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { fetchUserJira } from './UserFunctions'
-import { fetchJiraDetails } from './UserFunctions'
+import { fetchJiraDetails, fetchAllUsers } from './UserFunctions'
 import { Accordion, Alert, Card, Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap'
 
 class CreateTicket extends Component {
@@ -12,7 +12,7 @@ class CreateTicket extends Component {
     super(props);
     this.state = {
       columnDefs: [{
-        headerName: "Comment", field: "comment"
+        headerName: "Comment", field: "comment", width: 100
       }, {
         headerName: "Added_by", field: "added_by"
       }, {
@@ -20,65 +20,68 @@ class CreateTicket extends Component {
       }
       ],
       rowData: null,
+      defaultColDef: {
+        editable: true,
+        sortable: true,
+        flex: 1,
+        minWidth: 100,
+        filter: true,
+        resizable: true
+    },
       jiras: {},
-      isAuth:false
+      user_mails: []
     }
   }
 
   componentDidMount() {
-    const ticket_id = sessionStorage.getItem('currentTicket')
     this.isAuth = sessionStorage.getItem('isAuth')
-    console.log('ticket_id to load' + this.isAuth)
-    this.setState({
-      isAuth: sessionStorage.getItem('isAuth')
-    })
-    /* fetchJiraDetails(ticket_id).then(res => {
-      if (res) {
-        console.log('ticket_id to load' + (res))
-        this.setState({
-          jiras: res.jiras,
-          rowData: res.jiras.comment
-        })
-        this.render()
-      }
-    }).catch((err) => {
-      console.log('error- ' + err)
-    }) */
+    console.log('auth-'+this.isAuth)
+    this.render()
   }
 
   render() {
-    console.log('this.isAuth'+this.isAuth)
-    if (this.isAuth == undefined || this.isAuth == false) {
-      return <Alert variant="info">
-        <Alert.Heading>Hey, nice to see you</Alert.Heading>
-        <p>
-          You need to Sign In/Register first to load your profile.
-      </p>
-        <hr />
-      </Alert>
-    }
+    
     return (
-      <Form>
-        <Form.Group controlId="formBasicEmail">
-          <Form.Label>Email address</Form.Label>
-          <Form.Control type="email" placeholder="Enter email" />
-          <Form.Text className="text-muted">
-            We'll never share your email with anyone else.
-        </Form.Text>
-        </Form.Group>
+      <div className="h-auto w-100">
+        <Accordion defaultActiveKey="0">
+          <Card>
+            <Card.Header>
+              <Accordion.Toggle as={Button} variant="link" eventKey="0">
+                Log new Issue      </Accordion.Toggle>
+            </Card.Header>
+            <Accordion.Collapse eventKey="0">
+              <Card.Body>
+                <Form>
+                  <Form.Group controlId="formTitle">
+                    <Form.Label>Title</Form.Label>
+                    <Form.Control type="text" defaultValue={this.state.jiras.title} />
+                  </Form.Group>
+                  <Form.Group controlId="formDesc">
+                    <Form.Label>Problem Description</Form.Label>
+                    <Form.Control as="textarea" rows="4" defaultValue={this.state.jiras.description} />
+                  </Form.Group>
+                  <Form.Label>Assign To</Form.Label>
+                  <Form.Control as="select" name="assign to" defaultValue={this.state.jiras.assigned_to}>
+                    {this.state.user_mails.map((e, key) => {
+                      if (e === this.state.jiras.assigned_to) {
+                        return <option key={key} value={e} selected>{e}</option>;
+                      } else {
+                        return <option key={key} value={e}>{e}</option>;
+                      }
+                    })}
 
-        <Form.Group controlId="formBasicPassword">
-          <Form.Label>Password</Form.Label>
-          <Form.Control type="password" placeholder="Password" />
-        </Form.Group>
-        <Form.Group controlId="formBasicCheckbox">
-          <Form.Check type="checkbox" label="Check me out" />
-        </Form.Group>
-        <Button variant="primary" type="submit">
-          Submit
-      </Button>
-      </Form>
+                  </Form.Control>
+                  <br></br>
+                  <Button variant="primary" type="submit">
+                    Create
+                  </Button>
+                </Form>
 
+              </Card.Body>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
+      </div>
     );
   }
 }

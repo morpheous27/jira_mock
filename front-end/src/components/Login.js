@@ -32,6 +32,8 @@ class Login extends Component {
         login(user).then(res => {
             if (res) {
                 sessionStorage.setItem('user_mail',res.user_mail)
+                sessionStorage.setItem('first_name',res.first_name)
+                sessionStorage.setItem('last_name',res.last_name)
                 sessionStorage.setItem('isAuth',true)
                 this.props.history.push('/home')
             }else{

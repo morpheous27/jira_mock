@@ -45,3 +45,11 @@ export const fetchJiraDetails = (jid)=> {
         console.log('Error occurred while calling get'+err)
     });
 }
+
+export const fetchAllUsers = ()=> {
+    return axios.get('users/all').then(res => {
+        return res.data;
+    }).catch((err)=>{
+        console.log('Error occurred while calling get'+err)
+    });
+}

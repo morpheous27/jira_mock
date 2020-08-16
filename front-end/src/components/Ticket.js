@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import { fetchUserJira } from './UserFunctions'
-import { fetchJiraDetails } from './UserFunctions'
+import { fetchJiraDetails, fetchAllUsers } from './UserFunctions'
 import { Accordion, Alert, Card, Navbar, Nav, NavDropdown, Form, FormControl, Button } from 'react-bootstrap'
 
 class Ticket extends Component {
@@ -12,7 +12,7 @@ class Ticket extends Component {
     super(props);
     this.state = {
       columnDefs: [{
-        headerName: "Comment", field: "comment"
+        headerName: "Comment", field: "comment", width: 100
       }, {
         headerName: "Added_by", field: "added_by"
       }, {
@@ -20,14 +20,32 @@ class Ticket extends Component {
       }
       ],
       rowData: null,
-      jiras: {}
+      defaultColDef: {
+        editable: true,
+        sortable: true,
+        flex: 1,
+        minWidth: 100,
+        filter: true,
+        resizable: true
+    },
+      jiras: {},
+      user_mails: []
     }
   }
 
   componentDidMount() {
     const ticket_id = sessionStorage.getItem('currentTicket')
     this.isAuth = sessionStorage.getItem('isAuth')
+    // fetch all users
+    fetchAllUsers().then(res => {
+      if (res) {
+        this.setState({
+          user_mails: res.users.map(u => u.user_mail)
+        })
+      }
+    })
 
+    // fetch all jira details
     fetchJiraDetails(ticket_id).then(res => {
       if (res) {
         console.log('ticket_id to load' + (res))
@@ -35,7 +53,6 @@ class Ticket extends Component {
           jiras: res.jiras,
           rowData: res.jiras.comment
         })
-        this.render()
       }
     }).catch((err) => {
       console.log('error- ' + err)
@@ -44,7 +61,8 @@ class Ticket extends Component {
 
   render() {
     if (this.isAuth == undefined || this.isAuth == false) {
-      return <div classs="container">
+      return <div className="container">
+        <br></br>
         <Alert variant="info">
           <Alert.Heading>Hey, nice to see you</Alert.Heading>
           <p>
@@ -55,38 +73,68 @@ class Ticket extends Component {
       </div>
     }
     return (
-      <div>
-        <div style="height: 100px; background-color: rgba(255,0,0,0.1);">
-          <div class="h-25 d-inline-block" style="width: 120px; background-color: rgba(0,0,255,.1)">Height 25%</div>
-          <div class="h-50 d-inline-block" style="width: 120px; background-color: rgba(0,0,255,.1)">Height 50%</div>
-          <div class="h-75 d-inline-block" style="width: 120px; background-color: rgba(0,0,255,.1)">Height 75%</div>
-          <div class="h-100 d-inline-block" style="width: 120px; background-color: rgba(0,0,255,.1)">Height 100%</div>
-          <div class="h-auto d-inline-block" style="width: 120px; background-color: rgba(0,0,255,.1)">Height auto</div>
-        </div>
-        <div class="container-fluid" style={{ 'border': 'dashed' }}>
-          <div class="ag-theme-alpine">
-            <Form>
-              <Form.Group controlId="exampleForm.ControlInput1">
-                <Form.Label>Ticket Id</Form.Label>
-                <Form.Control type="email" value={this.state.jiras.jid} />
-              </Form.Group>
-              <Form.Group controlId="exampleForm.ControlInput1">
-                <Form.Label>Title</Form.Label>
-                <Form.Control type="text" value={this.state.jiras.title} />
-              </Form.Group>
-              <Form.Group controlId="exampleForm.ControlTextarea1">
-                <Form.Label>Problem description</Form.Label>
-                <Form.Control as="textarea" rows="3" value={this.state.jiras.description} />
-              </Form.Group>
-            </Form>
-            <AgGridReact
-              columnDefs={this.state.columnDefs}
-              rowData={this.state.rowData}>
-            </AgGridReact>
-          </div>
-        </div>
-      </div>
+      <div className="h-auto w-100">
+        <Accordion defaultActiveKey="0">
+          <Card>
+            <Card.Header>
+              <Accordion.Toggle as={Button} variant="link" eventKey="0">
+                Issue Description
+      </Accordion.Toggle>
+            </Card.Header>
+            <Accordion.Collapse eventKey="0">
+              <Card.Body>
+                <Form>
+                  <Form.Group controlId="formTicketId">
+                    <Form.Label>TicketId</Form.Label>
+                    <Form.Control type="text" defaultValue={this.state.jiras.jid} />
+                  </Form.Group>
+                  <Form.Group controlId="formTitle">
+                    <Form.Label>Title</Form.Label>
+                    <Form.Control type="text" defaultValue={this.state.jiras.title} />
+                  </Form.Group>
+                  <Form.Group controlId="formDesc">
+                    <Form.Label>Problem Description</Form.Label>
+                    <Form.Control as="textarea" rows="4" defaultValue={this.state.jiras.description} />
+                  </Form.Group>
+                  <Form.Group controlId="formTitle">
+                    <Form.Label>Status</Form.Label>
+                    <Form.Control type="text" defaultValue={this.state.jiras.status} />
+                  </Form.Group>
+                  <Form.Group controlId="formTitle">
+                    <Form.Label>Current owner</Form.Label>
+                    <Form.Control type="text" defaultValue={this.state.jiras.assigned_to} />
+                  </Form.Group>
+                  <Form.Label>Assign To</Form.Label>
+                  <Form.Control as="select" name="assign to" defaultValue={this.state.jiras.assigned_to}>
+                    {this.state.user_mails.map((e, key) => {
+                      if (e === this.state.jiras.assigned_to) {
+                        return <option key={key} value={e} selected>{e}</option>;
+                      } else {
+                        return <option key={key} value={e}>{e}</option>;
+                      }
+                    })}
 
+                  </Form.Control>
+                  <br></br>
+                  <Form.Label>Comments</Form.Label>
+                  <div className="ag-theme-alpine w-65" style={{ height: '200px' }}>
+                    <AgGridReact
+                      columnDefs={this.state.columnDefs}
+                      rowData={this.state.rowData} defaultColDef={this.state.defaultColDef}> 
+                    </AgGridReact>
+                  </div>
+                  <br></br>
+
+                  <Button variant="primary" type="submit">
+                    Update
+                  </Button>
+                </Form>
+
+              </Card.Body>
+            </Accordion.Collapse>
+          </Card>
+        </Accordion>
+      </div>
     );
   }
 }

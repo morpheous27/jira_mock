@@ -7,7 +7,8 @@ const bcrypt  = require('bcrypt')
 const User = require('../models/User')
 const Jira = require('../models/Jira')
 const db = require('../database/db')
-const controller = require('../controller/jira.controller')
+const jiraController = require('../controller/jira.controller')
+const userController = require('../controller/user.controller')
 
 users.use(cors())
 
@@ -25,7 +26,7 @@ users.post('/register', (req, res) => {
 
     }
 
-    User.findOne({
+    db.user.findOne({
         where: {
             user_mail: req.body.user_mail
         }
@@ -35,7 +36,7 @@ users.post('/register', (req, res) => {
                 console.log('step 2')
                 bcrypt.hash(req.body.password, 10, (err, hash) =>  {
                     userData.password = hash
-                    User.create(userData).then(user => {
+                    db.user.create(userData).then(user => {
                         res.json({ status: user.user_mail + 'registered.'})
                     }).catch(err => {
                         res.send('error: ' + err)
@@ -62,7 +63,7 @@ users.post('/login',(req, res) => {
                     expiresIn: 1440
                 })
                 //res.send(token)
-                res.send({user_mail:user.user_mail, token: token})
+                res.send({user_mail:user.user_mail, first_name:user.first_name, last_name: user.last_name, token: token})
             }else{
                 res.status(401).json({error : 'Invalid user credentials'})
             }
@@ -118,8 +119,30 @@ users.get('/jira/:jid',(req,res) => {
     })
 });
 
-users.get('/jira/:jid',(req, res) => {
-    return controller.getJiraDetailsById(req.params.jid);
+users.get('/all',(req,res) => {
+    db.user.findAll()
+    .then(users => {
+        if(users){
+           res.send({users: users})
+        }else{
+            res.send('No users found')
+        }
+    }).catch((err)=> {
+        res.status(400).json({error : 'request failed due to error- '+ err})
+    })
+}); 
+
+/* users.get('/jira/:jid',(req, res) => {
+    return jiraController.getJiraDetailsById(req.params.jid);
+}) */
+
+users.get('/all', (req,res)=>{
+    let users =  userController.getUsers();
+    if(users){
+        res.send({users:users});
+    }else{
+        res.send('No Users found')
+    }
 })
 
 module.exports = users
