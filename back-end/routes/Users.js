@@ -132,6 +132,24 @@ users.get('/all',(req,res) => {
     })
 }); 
 
+
+users.put('/jira/',(req,res) => {
+    db.jira.update(req.body.jira,{
+        where:{
+            jid: req.body.jira.jid
+        }
+    })
+    .then(jira => {
+        if(jira){
+           res.send({jira: jira})
+        }else{
+            res.send('No jira found')
+        }
+    }).catch((err)=> {
+        res.status(400).json({error : 'request failed due to error- '+ err})
+    })
+}); 
+
 /* users.get('/jira/:jid',(req, res) => {
     return jiraController.getJiraDetailsById(req.params.jid);
 }) */

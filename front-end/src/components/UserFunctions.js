@@ -53,3 +53,13 @@ export const fetchAllUsers = ()=> {
         console.log('Error occurred while calling get'+err)
     });
 }
+
+export const updateJira = (jira)=> {
+    return axios.put('users/jira',{
+        jira:jira
+    }).then(res => {
+        return res.data;
+    }).catch((err)=>{
+        console.log('Error occurred while calling put '+err)
+    });
+}
