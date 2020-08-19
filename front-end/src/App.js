@@ -9,6 +9,10 @@ import Register from './components/Register'
 import Ticket from './components/Ticket'
 import Logout from './components/Logout'
 import CreateTicket from './components/CreateTicket'
+import UpdateSuccess from './components/UpdateSuccess'
+import CreateSuccess from './components/CreateSuccess'
+
+
 
 class App extends Component {
 
@@ -26,6 +30,9 @@ class App extends Component {
             <Route exact path="/createTicket" component={CreateTicket} />
             <Route exact path="/ticket" component={Ticket} />
             <Route exact path="/logout" component={Logout} />
+            <Route exact path="/updateSuccess" component={UpdateSuccess} />
+            <Route exact path="/createSuccess" component={CreateSuccess} />
+
           </div>
         </div>
       </Router >

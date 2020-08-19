@@ -63,3 +63,14 @@ export const updateJira = (jira)=> {
         console.log('Error occurred while calling put '+err)
     });
 }
+
+export const createJira = (jira)=> {
+    return axios.post('users/jira',{
+        jira:jira
+    }).then(res => {
+        console.log('Jira created -' +res)
+        return res.data;
+    }).catch((err)=>{
+        console.log('Error occurred while calling post '+err)
+    });
+}

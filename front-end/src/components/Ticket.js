@@ -11,6 +11,7 @@ class Ticket extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      operationStatus:'',
       columnDefs: [{
         headerName: "Comment", field: "comment", width: 100
       }, {
@@ -58,6 +59,8 @@ class Ticket extends Component {
     }
     updateJira(jira).then(res => {
       console.log('jira updated successfully')
+      sessionStorage.setItem('operationStatus','success')
+      this.props.history.push('/updateSuccess')
     }).catch(err => {
       console.log('Error occurred at  - ' + err)
     })
@@ -75,6 +78,10 @@ class Ticket extends Component {
   componentDidMount() {
     const ticket_id = sessionStorage.getItem('currentTicket')
     this.isAuth = sessionStorage.getItem('isAuth')
+    this.setState({
+      operationStatus: ''
+    })
+
     // fetch all users
     fetchAllUsers().then(res => {
       if (res) {
@@ -119,6 +126,18 @@ class Ticket extends Component {
           <hr />
         </Alert>
       </div>
+    }
+    else if(this.state.operationStatus === 'success')
+    {
+      console.log('update operation success')
+      return <div className="container">
+      <br></br>
+      <Alert variant="info">
+        <Alert.Heading>Hey, nice to see you</Alert.Heading>
+        <p>Update successful.</p>
+        <a href="/ticket">Click to go back to the ticket</a>
+      </Alert>
+    </div>
     }
     return (
       <div className="h-auto w-100">

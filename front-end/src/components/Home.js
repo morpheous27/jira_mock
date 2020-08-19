@@ -59,10 +59,8 @@ class Home extends Component {
     }
     fetchUserJira(user).then(res => {
       if (!!res && !!res.jiras) {
-        const jiras = []
-        jiras.push(res.jiras)
         this.setState({
-          rowData: jiras
+          rowData: res.jiras
         })
 
       }else{

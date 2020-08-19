@@ -14,6 +14,9 @@ users.use(cors())
 
 process.env.SECRET_KEY = 'secret'
 
+/**
+ * Api to register new user
+ */
 users.post('/register', (req, res) => {
     const today = new Date();
     const userData = {
@@ -51,6 +54,9 @@ users.post('/register', (req, res) => {
     })
 })
 
+/**
+ * Api to login a user
+ */
 users.post('/login',(req, res) => {
     db.user.findOne({
         where: {
@@ -75,14 +81,21 @@ users.post('/login',(req, res) => {
     })
 })
 
+/**
+ * Api to find all the jiras of a logged in user.
+ */
 users.post('/jiras',(req, res) => {
-    db.jira.findOne({
+    db.jira.findAll({
         where: {
              assigned_to: req.body.user_mail
         }
     }).then(jiras => {
         if(jiras){
-           res.send({user_mail: jiras.dataValues.assigned_to, jiras: jiras.dataValues})
+            const jiraList = []
+            jiras.forEach(j => {
+                jiraList.push(j.dataValues)
+            })
+           res.send({user_mail: req.body.user_mail, jiras: jiraList})
         }else{
             res.send('No Jiras assigned')
         }
@@ -91,21 +104,9 @@ users.post('/jiras',(req, res) => {
     })
 })
 
-users.post('/jiras',(req, res) => {
-    db.jira.findOne({
-        where: {
-             assigned_to: req.body.user_mail
-        }
-    }).then(jiras => {
-        if(jiras){
-           res.send({user_mail: jiras.dataValues.assigned_to, jiras: jiras.dataValues})
-        }else{
-            res.send('No Jiras assigned')
-        }
-    }).catch((err)=> {
-        res.status(400).json({error : 'request failed due to error- '+ err})
-    })
-})
+/**
+ * Api to get the details of the jira based on jira id/ticket id.
+ */
 users.get('/jira/:jid',(req,res) => {
     db.jira.findByPk(req.params.jid, {include : 'comment'})
     .then(jiras => {
@@ -119,6 +120,9 @@ users.get('/jira/:jid',(req,res) => {
     })
 });
 
+/**
+ * Api to find all the users in the system.
+ */
 users.get('/all',(req,res) => {
     db.user.findAll()
     .then(users => {
@@ -133,6 +137,9 @@ users.get('/all',(req,res) => {
 }); 
 
 
+/**
+ * Api to update the jira againts the jira/ticket id
+ */
 users.put('/jira/',(req,res) => {
     db.jira.update(req.body.jira,{
         where:{
@@ -144,6 +151,22 @@ users.put('/jira/',(req,res) => {
            res.send({jira: jira})
         }else{
             res.send('No jira found')
+        }
+    }).catch((err)=> {
+        res.status(400).json({error : 'request failed due to error- '+ err})
+    })
+}); 
+
+/**
+ * Api to create a new jira
+ */
+users.post('/jira/',(req,res) => {
+    db.jira.create(req.body.jira)
+    .then(jira => {
+        if(jira){
+           res.send({jira: jira})
+        }else{
+            res.send('Could not create the jira')
         }
     }).catch((err)=> {
         res.status(400).json({error : 'request failed due to error- '+ err})
